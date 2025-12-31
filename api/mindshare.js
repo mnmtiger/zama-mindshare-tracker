@@ -2,22 +2,23 @@ import axios from 'axios';
 
 export default async function handler(req, res) {
     const { handle } = req.query;
-    if (!handle) return res.status(400).json({ error: 'No handle' });
+    if (!handle) return res.status(400).json({ error: 'Handle required' });
 
-    const BEARER_TOKEN = AAAAAAAAAAAAAAAAAAAAAMia6gEAAAAAZeH1%2FjyWYfqrx%2BUNrQ6RtACNkKI%3DWGXr79cKVlUfYP0v6cUfSikXr1w3hAFzpLHxYUL59Jtw62tzjG
+    const BEARER_TOKEN = process.env.BEARER_TOKEN;
+    if (!BEARER_TOKEN) return res.status(500).json({ error: 'Token not set' });
 
     try {
-        const now = new Date().toISOString();
-        const yesterday = new Date(Date.now() - 86400000).toISOString();
-        const weekAgo = new Date(Date.now() - 604800000).toISOString();
+        const now = new Date();
+        const yesterday = new Date(now - 24 * 60 * 60 * 1000).toISOString();
+        const weekAgo = new Date(now - 7 * 24 * 60 * 60 * 1000).toISOString();
 
         const [resp24, resp7d] = await Promise.all([
             axios.get('https://api.twitter.com/2/tweets/search/recent', {
-                params: { query: `from:${handle} since:${yesterday}`, max_results: 100 },
+                params: { query: `from:${handle} since:${yesterday.slice(0,10)}`, max_results: 100 },
                 headers: { Authorization: `Bearer ${BEARER_TOKEN}` }
             }),
             axios.get('https://api.twitter.com/2/tweets/search/recent', {
-                params: { query: `from:${handle} since:${weekAgo}`, max_results: 100 },
+                params: { query: `from:${handle} since:${weekAgo.slice(0,10)}`, max_results: 100 },
                 headers: { Authorization: `Bearer ${BEARER_TOKEN}` }
             })
         ]);
@@ -33,8 +34,7 @@ export default async function handler(req, res) {
             '7d': { mindshare: mindshare7d, change: '0%' }
         });
     } catch (error) {
-        res.status(500).json({ error: 'API error' });
+        console.error(error);
+        res.status(500).json({ error: 'Failed to fetch data' });
     }
 }
-
-export const config = { api: { bodyParser: false } };
