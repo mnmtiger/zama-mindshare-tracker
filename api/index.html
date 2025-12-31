@@ -2,64 +2,134 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Zama SZN Mindshare Rank</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Zama SZN Mindshare Rank Tracker</title>
     <style>
-        body { background: #000; color: #FFD700; font-family: Arial; text-align: center; padding: 40px; }
-        .container { max-width: 600px; margin: 0 auto; }
-        .logo { font-size: 3em; margin-bottom: 20px; }
-        .search { background: rgba(255,255,255,0.1); border-radius: 50px; padding: 20px; margin: 40px 0; }
-        input { width: 70%; padding: 15px; background: transparent; border: none; color: white; font-size: 1.2em; }
-        button { padding: 15px 30px; background: #FF8C00; border: none; border-radius: 50px; color: black; font-weight: bold; cursor: pointer; }
-        .cards { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 40px; }
-        .card { background: rgba(30,30,30,0.8); padding: 30px; border-radius: 20px; border: 1px solid #FFD700; }
-        .mindshare { font-size: 2.5em; font-weight: bold; }
-        .change { font-size: 1.2em; margin-top: 10px; }
+        body { 
+            background: #000; 
+            color: #FFD700; 
+            font-family: 'Arial', sans-serif; 
+            margin: 0; 
+            padding: 0; 
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+        }
+        .header {
+            width: 100%;
+            background: rgba(255,215,0,0.9);
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+        }
+        .header h1 {
+            font-size: clamp(1.8em, 6vw, 2.5em);
+            margin: 0;
+        }
+        .search-box {
+            margin: 40px 20px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 50px;
+            padding: 15px;
+            display: flex;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+        }
+        input {
+            flex: 1;
+            background: transparent;
+            border: none;
+            color: white;
+            font-size: 1.2em;
+            padding: 0 15px;
+            outline: none;
+        }
+        input::placeholder { color: rgba(255,255,255,0.6); }
+        button {
+            background: linear-gradient(135deg, #FF8C00, #FFD700);
+            border: none;
+            padding: 15px 30px;
+            border-radius: 50px;
+            color: black;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .cards {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            width: 90%;
+            max-width: 600px;
+            margin: 20px;
+        }
+        .card {
+            background: rgba(30,30,30,0.8);
+            border: 1px solid #FFD700;
+            border-radius: 20px;
+            padding: 30px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+        .period { font-size: 1.2em; opacity: 0.8; }
+        .mindshare { font-size: 2.8em; font-weight: bold; margin: 15px 0; }
+        .change { font-size: 1.2em; }
         .positive { color: #00FF00; }
         .negative { color: #FF0000; }
+        .creator {
+            margin: 50px 20px 20px;
+            font-size: 1em;
+            opacity: 0.8;
+        }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="logo">Z</div>
+    <div class="header">
         <h1>ZAMA SZN 5 RANK</h1>
-        
-        <div class="search">
-            <input type="text" id="handle" placeholder="Search X handle (e.g. @mnmahfuz01)">
-            <button onclick="search()">Search</button>
-        </div>
-
-        <div class="cards">
-            <div class="card">
-                <div>24h</div>
-                <div class="mindshare" id="mind24">0.000000</div>
-                <div class="change negative" id="change24">▼ 0%</div>
-            </div>
-            <div class="card">
-                <div>7d</div>
-                <div class="mindshare" id="mind7">0.000000</div>
-                <div class="change positive" id="change7">▲ 0%</div>
-            </div>
-        </div>
-
-        <p style="margin-top:50px; opacity:0.8;">Created by @MNMAHFUZ01 for Zama Creator Program 🧺</p>
     </div>
+
+    <div class="search-box">
+        <input type="text" id="handleInput" placeholder="Search X handle (e.g. @mnmahfuz01)">
+        <button onclick="search()">Search</button>
+    </div>
+
+    <div class="cards">
+        <div class="card">
+            <div class="period">24h</div>
+            <div class="mindshare" id="mind24">0.000000</div>
+            <div class="change negative" id="change24">▼ 0%</div>
+        </div>
+        <div class="card">
+            <div class="period">7d</div>
+            <div class="mindshare" id="mind7">0.000000</div>
+            <div class="change positive" id="change7">▲ 0%</div>
+        </div>
+    </div>
+
+    <p class="creator">Created by @MNMAHFUZ01 for Zama Creator Program 🧺</p>
 
     <script>
         async function search() {
-            const handle = document.getElementById('handle').value.trim().replace('@', '');
+            const handle = document.getElementById('handleInput').value.trim().replace('@', '');
             if (!handle) return alert('Enter a handle!');
 
-            const res = await fetch(`/api/mindshare?handle=${handle}`);
-            const data = await res.json();
+            try {
+                const res = await fetch(`/api/mindshare?handle=${handle}`);
+                if (!res.ok) throw new Error('API error');
+                const data = await res.json();
 
-            document.getElementById('mind24').textContent = data['24h'].mindshare;
-            document.getElementById('change24').textContent = data['24h'].change;
-            document.getElementById('change24').className = 'change ' + (data['24h'].change.includes('+') ? 'positive' : 'negative');
+                document.getElementById('mind24').textContent = data['24h'].mindshare;
+                document.getElementById('change24').textContent = data['24h'].change;
+                document.getElementById('change24').className = 'change ' + (data['24h'].change.includes('+') ? 'positive' : 'negative');
 
-            document.getElementById('mind7').textContent = data['7d'].mindshare;
-            document.getElementById('change7').textContent = data['7d'].change;
-            document.getElementById('change7').className = 'change ' + (data['7d'].change.includes('+') ? 'positive' : 'negative');
+                document.getElementById('mind7').textContent = data['7d'].mindshare;
+                document.getElementById('change7').textContent = data['7d'].change;
+                document.getElementById('change7').className = 'change ' + (data['7d'].change.includes('+') ? 'positive' : 'negative');
+            } catch (err) {
+                alert('Error loading data. Try again later.');
+            }
         }
     </script>
 </body>
